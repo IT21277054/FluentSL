@@ -32,6 +32,42 @@ const AppContent = (): any => {
   const [isVoiceTranslating, setIsVoiceTranslating] = useState(false);
   const [voiceMessage, setVoiceMessage] = useState('');
 
+  const handleFileSelect = (event) => {
+    setSelectedFile(event.target.files[0]);
+  };
+
+  // Function to handle file upload
+  async function handleFileUpload() {
+    if (selectedFile) {
+      const formData = new FormData();
+      formData.append('file', selectedFile);
+
+      try {
+        // Send the file to the server for translation
+        const response = await axios.post(
+          'https://rapidapi.com/gatzuma/api/deep-translate1/', // Replace with your actual API endpoint
+          formData,
+          {
+            headers: {
+              ...headers,
+              'Content-Type': 'multipart/form-data',
+              'X-RapidAPI-Key': '72da342e86msh3727e21bd0e9a64p172046jsn2439d25a53f4',
+              'X-RapidAPI-Host':'deep-translate1.p.rapidapi.com'
+            },
+          }
+        );
+
+        // Handle the response, set the translation result in setValue
+        setValue(response.data);
+        console.log(response.data);
+      } catch (error) {
+        console.error(error);
+      }
+    } else {
+      console.log('No file selected for translation.');
+    }
+  }
+
   
   async function handleVoiceTranslate(): Promise<void> {
     try {
@@ -191,8 +227,17 @@ const AppContent = (): any => {
               <Space wrap>
                 <div>
                   <Tooltip title="Attach">
+                  <input
+                      type="file"
+                      accept=".txt, .doc, .docx, .pdf" // Define accepted file types
+                      style={{ display: 'none' }}
+                      onChange={handleFileUpload}
+                      id="fileInput" // Add an ID for the input
+                    />
+                    <label htmlFor="fileInput">
                     <Button
-                      type="primary"
+                       onClick={handleVoiceTranslate}
+                       type="primary"
                       shape="rectangle"
                       icon={<PaperClipOutlined />}
                       style={{
@@ -202,6 +247,7 @@ const AppContent = (): any => {
                         color: 'black',
                       }}
                     />
+                    </label>
                     </Tooltip>
                 <Tooltip title="Voice">
 
